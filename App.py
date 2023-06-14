@@ -5,8 +5,9 @@ import tkinter as tk
 import torch
 import math
 import torch.nn as nn
-import itertools
+import time
 import dlib
+from threading import Thread
 from imutils import face_utils
 from transformers import ViTConfig, ViTModel
 
@@ -312,6 +313,7 @@ def PE(pixel_values):
 def gauss(p, x_y, mu, sigma):
     return (1 / (sigma * math.sqrt(2 * math.pi))) * math.exp(- (p - mu[x_y])**2 / (2 * sigma**2))
 
+
 def calculate_average_rgb(frame):
     # Calcola il valore medio RGB del frame
     info = get_kp_info(frame)
@@ -325,16 +327,20 @@ def calculate_average_rgb(frame):
         output = model(input).detach().numpy()
         output = np.argmax(output)
         output = ID_TO_LABEL[output]
+        # output = "SIUM"
     return output
 
 def update_text():
-    if frame[0] is not None:
-        # Calcola il valore medio RGB del frame corrente
-        text = calculate_average_rgb(frame[0])
-        # Aggiorna la scritta con il valore medio RGB
-        # text = f"RGB: {r}, {g}, {b}"
-        text_label.config(text=text)
-    root.after(1000, update_text)
+    while True:
+        time.sleep(1)
+        if frame[0] is not None:
+            # Calcola il valore medio RGB del frame corrente
+            text = calculate_average_rgb(frame[0])
+            # Aggiorna la scritta con il valore medio RGB
+            # text = f"RGB: {r}, {g}, {b}"
+            text_label.config(text=text)
+    # root.after(1000, update_text)
+
 
 
 def show_frame():
@@ -356,8 +362,8 @@ def show_frame():
 frame = [None]
 checkpoint_path =  './ckp.pt'
 model = MyModel()
-model.load_state_dict(torch.load(checkpoint_path))
-model = model.to(DEVICE)
+# model.load_state_dict(torch.load(checkpoint_path))
+# model = model.to(DEVICE)
 model.eval()
 
 # Inizializza la finestra Tkinter
@@ -365,6 +371,7 @@ root = tk.Tk()
 root.title("Webcam")
 
 # Inizializza la cattura video dalla webcam
+
 cap = cv2.VideoCapture(0)
 
 # Crea una label per visualizzare il video
@@ -376,7 +383,8 @@ text_label = tk.Label(root, font=("Arial", 20))
 text_label.place(x=10, y=10)
 
 # Aggiorna il valore medio RGB ogni secondo
-update_text()
+thread = Thread(target=update_text)
+thread.start()
 
 # Avvia la visualizzazione del video
 show_frame()
