@@ -1,0 +1,6 @@
+torch
+dlib
+transformers
+opencv-python
+Pillow
+imutils

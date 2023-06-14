@@ -1,0 +1,63 @@
+slide 1:
+Buongiorno a tutti presenteremo il nostro progetto: A Custom Positional Encoding system for Facial Expression Recognition with Transformer.
+
+slide 2:
+Adesso farò una breve introduzione sui transformers.
+
+Slide 3:
+I transformers sono delle reti neurali che vengono utilizzate in particolare per task di NLP ma anche vision ottenendo ottimi risultati e velocizzando i tempi. La caratteristica prioncipale dei transformer è che possiedono un' attention mask che permette di impararre le parti importanti dell'input. Inoltre possidede un positional encoding che permette di rappresentare gli elementi spaziali dell'input.
+
+Slide 4:
+Come anticipato precedentemente i transformers vengono utilizzati nel campo della vision. 
+L'immagine input viene divisa in patch 16x16 e flattenata e passata ad un normale transformer, infatti il positional encoding è lo stesso dei transformers standand ovvero in posizioni pari dell'embedding è una funzione sinusoidale mentre nelle dispari cosinusoidale.
+
+slide 5:
+Adesso vediamo il nostro approccio proposto. 
+
+Slide 6:
+Per ottenere i keypoints utilizzeremo un modello pretrainato. I keypoints rappresentano dei punti di interesse in un viso, in particolare come si può vedere nell'immagine, il contorno del viso, naso, occhi, bocca. 
+
+Slide 7:
+Qui proponiamo il nostro approccio consiste nel modificare l'input e l'encoding scheme di un vision transformer. In particolare l'input è in questo una sequenza di keypoints dove ogni keypoint è rappresentato dalle sue coordinate (x,y). La formula mostrata moltiplicxa il positional encoding standard con la gaussiana rispetto ai keypoints. Ovviamente il keypoint andrebbe considerato nelle sue componenti x ed y e di conseguenza la gaussina andrebbe fatta rispetto all'asse x ed all'asse y generando 4 formule ma per semplicità sono state compattate in due.
+sigma è la standard deviation.
+mu è il centro della distribuzione.
+Abbiamo pensato di utilizzare questa formula perchè Il modello può usare queste informazioni per prestare maggiore attenzione ai keypoint posizionati in modo più centrale nell'immagine, e per comprendere le relazioni spaziali tra i keypoint in base alla loro posizione nella sequenza.
+Abbiamo pensato a 3 diverse tecniche per poterlo calcolare che sono 
+- la media dei keypoints .
+- il centro tra i keypoints estremi che formano una bounding box.
+- il centro le bounding box degli occhi e della bocca.
+
+Slide 8:
+Qui possiamo vedere la prima tecnica, la media dei kypoints nelle slide rappresentata dal punto verde. Questa soluzione è la più semplice ma potrebbe risentire di una concentrazione di keypoints in una determinata zona.
+
+Slide 9:
+Qui invece è mostrata la tecnica basata sul centro tra i keypoints estremi che formano una bounding box. in questo caso prendiamo in considerazione i keypoints agli estremi: in alto in basso a destra e a sinistra e facciamo la media rispetto agli assi x ed y ottenendo in questo modo il centro, questa tecnica è pià resistente alle concetrazioni di keypoints in una determinata zona. Però concentra la sua attenzione nella parte centrale del viso.
+
+Slide 10:
+Qui invece è mostrata la tecnica basata sul centro ottenuto dalle bounding box degli occhi e della bocca. In questo caso l'attenzione viene spostata sui keypoints che si trovano nell'area intorno agli occhi e alla bocca.
+
+slide 11:
+In questa slide vengono mostrate le heatmap dei positional enconding. In alto troviamo il positional enconding standard basato su seno e coseno. Sotto il positional encoding generato dalla formula gaussiana descritta precedentemente. Come si può nel nostro approccio vengono considerate maggiormente le zone che sono più vicine al centro di distribuzione, le aree evidenziate.
+
+Slide 12:
+Per quanto riguarda le metriche di valutazione utilizzeremo precision recall e f1 score. Inoltre come optimizers proveremo sia Adam che SGD questo perchè nel paper dei vision transformers gli autori per trainare da zero il modello hanno utilizzato Adam mentre per finetunarlo hanno utilizzato SGD, solamente effettuando i test potremmo definire quale dei due si comporti meglio nel nostro task visto che l'input è differente da quello del paper originale. Come loss function visto che si tratta di un problema di classificazione utilizzeremo la cross entropy loss.
+
+Slide 13:
+In questa slide vengono presentati i possibili dataset. La nostra prima scelta è AffectNet un dataset composto da più di 1M di immagini di cui circa 400k, sono visi e sono annotate. Per ora siamo in attesa della risposta. In caso di esito negativo abbiamo optato per Emotic un dataset  di circa 23k immagini annotate, tuttavia questo dataset non contiene solo immagini di visi pertanto in questi casi andrebbero identificati i visi nelle immagini comportando una riduzione della risoluzione dell'immagine. Anche per Emotic è necessaria l'autorizzazione. FER è un'altra possibile opzione consiste in 27k immagini annotate che però sono a bassa risoluzione 48x48 però è free.
+
+Slide 14:
+In conclusione analizzeremo i benefici e i possibili improvements.
+
+Slide 15:
+i possibili benefici del nostro approcio è che permette di focalizzarsi sulla specifica zona in cui sono concentrati i keypoints piuttosto che sull'intera struttura dell'immagine (viso). Inoltre dal momento che deve processare un input più leggero delle patch sarà sicuramente più veloce.
+Al contrario potrebbero sorgere alcuni problemi ad esempio la posizione dei keypoints potrebbe non essere sufficente a rappresentare accuratamente l'immagine. Oppure che la posizione dei keypoints potrebbe variare nelle differenti immagini portando a problemi di performance del modello.
+
+Slide 16:
+Per i possibili improvements abbiamo pensato di considerare i keypoints in 3d  in modo tale da poter cogliere maggiori sfaccettature del viso.
+Un'altro possibile improvements consiste nell' utilizzare il nostro approccio unito a quello standard.
+
+Slide 17:
+queste sono le references.
+
+slide 18:
+grazie per l'attenzione.
